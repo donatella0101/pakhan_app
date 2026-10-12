@@ -10,6 +10,7 @@ interface TodayCardProps {
   myStatus: PlayerStatus;
   buddyStatus: PlayerStatus;
   buddy: User | null;
+  isViewerDanya?: boolean;
   onSetStatus: (status: PlayerStatus) => Promise<void>;
   onNudgeBuddy: () => Promise<void>;
   onTriggerOutcome?: (outcome: OutcomeType) => void;
@@ -19,6 +20,7 @@ export const TodayCard: React.FC<TodayCardProps> = ({
   myStatus,
   buddyStatus,
   buddy,
+  isViewerDanya = true,
   onSetStatus,
   onNudgeBuddy,
   onTriggerOutcome
@@ -78,6 +80,39 @@ export const TodayCard: React.FC<TodayCardProps> = ({
     ? (buddy.username === 'hansahools' ? 'Миша' : (buddy.username === 'znkssmt' ? 'Даня' : (buddy.first_name || 'Кореш')))
     : 'Кореш';
 
+  // Determine current day visual card & phrase for this user's profile
+  let currentImgSrc = '';
+  let currentBadge = '';
+  let currentPhrase = '';
+  let currentBorder = 'border-white/10';
+  let currentOutcome: OutcomeType | null = null;
+
+  if (myStatus === 'PAKHAN' && buddyStatus === 'PAKHAN') {
+    currentImgSrc = '/assets/both_pakhan.jpg';
+    currentBadge = 'ОБА ПАХАНЫ 💪💪';
+    currentPhrase = 'СПАРТАНЦЫ НЕ ОТСТУПАЮТ, НЕ КАПИТУЛИРУЮТ';
+    currentBorder = 'border-white/40';
+    currentOutcome = 'BOTH_PAKHAN';
+  } else if (myStatus === 'MALOY' && buddyStatus === 'MALOY') {
+    currentImgSrc = '/assets/both_maloy.jpg';
+    currentBadge = 'ОБА МАЛЫЕ 🍼🍼';
+    currentPhrase = 'Отлично проебали день гомики с горбатой горы, завтра узнаем остались ли вы пидорами';
+    currentBorder = 'border-rose-500/40';
+    currentOutcome = 'BOTH_MALOY';
+  } else if (myStatus === 'PAKHAN') {
+    currentImgSrc = isViewerDanya ? '/assets/danya_pakhan.jpg' : '/assets/misha_pakhan.jpg';
+    currentBadge = isViewerDanya ? 'ДАНЯ — ПАХАН 💪' : 'МИША — ПАХАН 💪';
+    currentPhrase = 'приветствую пахан сегодня это твой день от начала и до конца, еби и завтрешний день';
+    currentBorder = isViewerDanya ? 'border-emerald-500/50' : 'border-sky-500/50';
+    currentOutcome = 'I_WON';
+  } else if (myStatus === 'MALOY') {
+    currentImgSrc = isViewerDanya ? '/assets/danya_maloy.jpg' : '/assets/misha_maloy.jpg';
+    currentBadge = isViewerDanya ? 'ДАНЯ — МАЛОЙ 🍼' : 'МИША — МАЛОЙ 🍼';
+    currentPhrase = 'общий малой сегодня ты конкертная вафельница попробуй сделать хоть что нибудь завтра';
+    currentBorder = 'border-rose-500/40';
+    currentOutcome = 'BUDDY_WON';
+  }
+
   return (
     <div className="px-4 py-2">
       <div className="glass-panel rounded-2xl p-4 border-white/10 relative overflow-hidden bg-dark-900/90 shadow-xl">
@@ -92,25 +127,22 @@ export const TodayCard: React.FC<TodayCardProps> = ({
             </h2>
           </div>
 
-          {/* Outcome Badge if both marked */}
-          {myStatus !== 'NONE' && buddyStatus !== 'NONE' && (
+          {/* Outcome Badge if marked */}
+          {currentOutcome && (
             <button
               onClick={() => {
-                if (onTriggerOutcome) {
-                  if (myStatus === 'PAKHAN' && buddyStatus === 'PAKHAN') onTriggerOutcome('BOTH_PAKHAN');
-                  else if (myStatus === 'MALOY' && buddyStatus === 'MALOY') onTriggerOutcome('BOTH_MALOY');
-                  else if (myStatus === 'PAKHAN') onTriggerOutcome('I_WON');
-                  else onTriggerOutcome('BUDDY_WON');
+                if (onTriggerOutcome && currentOutcome) {
+                  onTriggerOutcome(currentOutcome);
                 }
               }}
-              title="Посмотреть итог дня"
+              title="Посмотреть карточку на весь экран"
               className="px-2.5 py-1 rounded-full bg-zinc-950 hover:bg-zinc-800 border border-white/20 text-xs font-bold text-white shadow active:scale-95 transition cursor-pointer flex items-center space-x-1"
             >
               <span>
-                {myStatus === 'PAKHAN' && buddyStatus === 'PAKHAN' && '💪💪 Два Пахана'}
-                {myStatus === 'MALOY' && buddyStatus === 'MALOY' && '🍼🍼 Два Малых'}
-                {myStatus === 'PAKHAN' && buddyStatus === 'MALOY' && '💪 Ты забрал день!'}
-                {myStatus === 'MALOY' && buddyStatus === 'PAKHAN' && `🍼 ${buddyDisplayName} забрал день`}
+                {currentOutcome === 'BOTH_PAKHAN' && '💪💪 Два Пахана'}
+                {currentOutcome === 'BOTH_MALOY' && '🍼🍼 Два Малых'}
+                {currentOutcome === 'I_WON' && '💪 Ты Пахан!'}
+                {currentOutcome === 'BUDDY_WON' && '🍼 Ты Малой'}
               </span>
             </button>
           )}
@@ -160,6 +192,37 @@ export const TodayCard: React.FC<TodayCardProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Inline Personal Profile Photo & Quote Card */}
+        {currentImgSrc && (
+          <div
+            onClick={() => {
+              if (onTriggerOutcome && currentOutcome) {
+                hapticImpact('light');
+                onTriggerOutcome(currentOutcome);
+              }
+            }}
+            className="mb-4 cursor-pointer group"
+          >
+            <div className={`relative w-full rounded-2xl overflow-hidden border ${currentBorder} bg-zinc-950 shadow-2xl transition-all group-hover:scale-[1.01]`}>
+              <div className="relative w-full aspect-[4/3] bg-zinc-900 overflow-hidden">
+                <img
+                  src={currentImgSrc}
+                  alt={currentBadge}
+                  className="w-full h-full object-cover object-center"
+                />
+                <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 text-[10px] font-black uppercase tracking-wider text-white shadow-lg">
+                  {currentBadge}
+                </div>
+              </div>
+              <div className="p-3.5 bg-zinc-950 text-center border-t border-white/10">
+                <p className="text-xs text-zinc-100 font-semibold italic leading-relaxed">
+                  «{currentPhrase}»
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Buddy status preview & Nudge */}
         <div className="pt-3 border-t border-white/10 flex items-center justify-between bg-zinc-950/60 -mx-4 -mb-4 px-4 py-3">

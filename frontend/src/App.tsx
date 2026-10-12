@@ -263,6 +263,7 @@ export const App: React.FC = () => {
         myStatus={myTodayStatus}
         buddyStatus={buddyTodayStatus}
         buddy={buddy}
+        isViewerDanya={isUser1}
         onSetStatus={(status) => handleUpdateStatus(todayStr, status)}
         onNudgeBuddy={handleNudgeBuddy}
         onTriggerOutcome={(outcome) => setOutcomeModal({ isOpen: true, outcome })}
