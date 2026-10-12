@@ -29,11 +29,11 @@ export const OutcomeModal: React.FC<OutcomeModalProps> = ({
       case 'BOTH_MALOY':
         return '/assets/both_maloy.jpg';
       case 'I_WON':
-        // Viewer is PAKHAN
-        return isViewerDanya ? '/assets/misha_pakhan.jpg' : '/assets/misha_pakhan.jpg';
+        // Viewer is PAKHAN (Danya in red jacket with belt / Misha looking stern)
+        return isViewerDanya ? '/assets/danya_pakhan.jpg' : '/assets/misha_pakhan.jpg';
       case 'BUDDY_WON':
-        // Viewer is MALOY
-        return isViewerDanya ? '/assets/danya_maloy.jpg' : '/assets/danya_maloy.jpg';
+        // Viewer is MALOY (Danya on couch with bottle / Misha sitting down)
+        return isViewerDanya ? '/assets/danya_maloy.jpg' : '/assets/misha_maloy.jpg';
     }
   };
 
