@@ -48,12 +48,20 @@ app.get('/api/health', (req, res) => {
 // 2. Init user and get or join duel
 app.post('/api/duels/init', (req, res) => {
   try {
-    const { telegramUser, duelCode } = req.body;
+    const { telegramUser, duelCode, asUser } = req.body;
 
     // Use mock user if opened outside Telegram
-    const tgId = telegramUser?.id ? String(telegramUser.id) : 'demo_user_1';
-    const tgUsername = telegramUser?.username || 'brat_1';
-    const tgFirstName = telegramUser?.first_name || 'Братуха';
+    const isMock = !telegramUser?.id;
+    const requestedSlot = asUser || 'user1';
+    
+    // Check if user is Misha by username or requested slot
+    const isMisha = telegramUser?.username?.toLowerCase() === 'hansahools' || requestedSlot === 'user2';
+    
+    const tgId = telegramUser?.id 
+      ? String(telegramUser.id) 
+      : (isMisha ? 'demo_misha' : 'demo_danya');
+    const tgUsername = telegramUser?.username || (isMisha ? 'hansahools' : 'znkssmt');
+    const tgFirstName = telegramUser?.first_name || (isMisha ? 'Миша' : 'Даня');
     const tgPhoto = telegramUser?.photo_url || null;
 
     // Upsert current user
@@ -100,6 +108,20 @@ app.post('/api/duels/init', (req, res) => {
         RETURNING *
       `);
       duel = insertDuel.get(code, currentUser.id);
+    }
+
+    // For demo/web mode, auto-link demo_misha so both players exist immediately
+    if (isMock && !duel.user2_id) {
+      const demoMisha = db.prepare(`
+        INSERT INTO users (telegram_id, username, first_name)
+        VALUES ('demo_misha', 'hansahools', 'Миша')
+        ON CONFLICT(telegram_id) DO UPDATE SET first_name = excluded.first_name
+        RETURNING *
+      `).get() as any;
+      if (demoMisha && demoMisha.id !== duel.user1_id) {
+        db.prepare('UPDATE duels SET user2_id = ? WHERE id = ?').run(demoMisha.id, duel.id);
+        duel.user2_id = demoMisha.id;
+      }
     }
 
     // Fetch user1 and user2 details

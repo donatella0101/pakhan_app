@@ -47,7 +47,7 @@ export const DayModal: React.FC<DayModalProps> = ({
       hapticImpact('heavy');
       if (selectedStatus === 'PAKHAN') {
         confetti({
-          particleCount: 40,
+          particleCount: 50,
           spread: 60,
           origin: { y: 0.6 }
         });
@@ -61,41 +61,41 @@ export const DayModal: React.FC<DayModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-md bg-dark-900 border border-white/10 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-md bg-dark-950 border border-white/10 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl relative">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-zinc-800 text-zinc-400 hover:text-white transition active:scale-95"
+          className="absolute top-4 right-4 p-2 rounded-full bg-zinc-900 text-zinc-400 hover:text-white transition active:scale-95 border border-white/5"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
         <div className="mb-4 pr-8">
-          <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">
-            Отметка в календаре
+          <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider font-display">
+            Отметка дня
           </span>
           <h3 className="text-base font-extrabold text-white capitalize font-display">
             {formattedDate}
           </h3>
         </div>
 
-        {/* Outcome banner if both filled */}
-        <div className="mb-4 p-3 rounded-2xl bg-zinc-800/80 border border-white/5 flex items-center justify-between">
+        {/* Outcome banner if buddy filled */}
+        <div className="mb-4 p-3 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-between">
           <div className="text-xs">
             <span className="text-zinc-400 block text-[10px] uppercase font-bold">
               Статус {buddyName}:
             </span>
             <span className="font-bold text-white">
-              {currentBuddyStatus === 'PAKHAN' && '👑 Пахан (не ленился)'}
+              {currentBuddyStatus === 'PAKHAN' && '💪 Пахан (не ленился)'}
               {currentBuddyStatus === 'MALOY' && '🍼 Малой (дал слабину)'}
               {currentBuddyStatus === 'NONE' && '⏳ Ещё не отметил день'}
             </span>
           </div>
 
           <div className="text-2xl">
-            {currentBuddyStatus === 'PAKHAN' ? '👑' : currentBuddyStatus === 'MALOY' ? '🍼' : '⏳'}
+            {currentBuddyStatus === 'PAKHAN' ? '💪' : currentBuddyStatus === 'MALOY' ? '🍼' : '⏳'}
           </div>
         </div>
 
@@ -112,17 +112,17 @@ export const DayModal: React.FC<DayModalProps> = ({
                 hapticImpact('medium');
                 setSelectedStatus('PAKHAN');
               }}
-              className={`p-3 rounded-2xl border flex flex-col items-center justify-center transition-all ${
+              className={`p-3.5 rounded-2xl border flex flex-col items-center justify-center transition-all ${
                 selectedStatus === 'PAKHAN'
-                  ? 'bg-amber-500 border-amber-400 text-black font-extrabold shadow-lg shadow-amber-500/25 scale-102'
-                  : 'bg-zinc-800 border-white/5 text-zinc-300 hover:border-amber-500/30'
+                  ? 'bg-white border-white text-black font-extrabold shadow-xl scale-[1.02]'
+                  : 'bg-zinc-900 border-white/10 text-zinc-300 hover:border-white/30'
               }`}
             >
-              <span className="text-3xl mb-1">👑</span>
-              <span className="text-xs font-black uppercase font-display">
+              <span className="text-3xl mb-1.5 leading-none">💪</span>
+              <span className={`text-xs font-black uppercase font-display ${selectedStatus === 'PAKHAN' ? 'text-black' : 'text-white'}`}>
                 Пахан
               </span>
-              <span className={`text-[10px] ${selectedStatus === 'PAKHAN' ? 'text-black/80' : 'text-zinc-500'}`}>
+              <span className={`text-[10px] mt-0.5 ${selectedStatus === 'PAKHAN' ? 'text-black/80 font-bold' : 'text-zinc-500'}`}>
                 день закрыт чётко
               </span>
             </button>
@@ -133,40 +133,35 @@ export const DayModal: React.FC<DayModalProps> = ({
                 hapticImpact('medium');
                 setSelectedStatus('MALOY');
               }}
-              className={`p-3 rounded-2xl border flex flex-col items-center justify-center transition-all ${
+              className={`p-3.5 rounded-2xl border flex flex-col items-center justify-center transition-all ${
                 selectedStatus === 'MALOY'
-                  ? 'bg-rose-500 border-rose-400 text-white font-extrabold shadow-lg shadow-rose-500/25 scale-102'
-                  : 'bg-zinc-800 border-white/5 text-zinc-300 hover:border-rose-500/30'
+                  ? 'bg-zinc-800 border-white/20 text-white font-extrabold shadow-lg scale-[1.02]'
+                  : 'bg-zinc-900 border-white/10 text-zinc-300 hover:border-rose-500/30'
               }`}
             >
-              <span className="text-3xl mb-1">🍼</span>
-              <span className="text-xs font-black uppercase font-display">
+              <span className="text-3xl mb-1.5 leading-none">🍼</span>
+              <span className={`text-xs font-black uppercase font-display ${selectedStatus === 'MALOY' ? 'text-rose-400' : 'text-zinc-300'}`}>
                 Малой
               </span>
-              <span className={`text-[10px] ${selectedStatus === 'MALOY' ? 'text-white/80' : 'text-zinc-500'}`}>
+              <span className={`text-[10px] mt-0.5 ${selectedStatus === 'MALOY' ? 'text-rose-300' : 'text-zinc-500'}`}>
                 день потерян
               </span>
             </button>
           </div>
-
-          {selectedStatus !== 'NONE' && (
-            <button
-              onClick={() => setSelectedStatus('NONE')}
-              className="w-full text-center text-[11px] text-zinc-500 hover:text-zinc-300 py-1 transition"
-            >
-              Сбросить отметку
-            </button>
-          )}
         </div>
 
-        {/* Action Button */}
+        {/* Save Button */}
         <button
           onClick={handleSave}
-          disabled={saving}
-          className="w-full py-3.5 px-4 rounded-2xl bg-amber-500 hover:bg-amber-400 active:scale-98 transition font-black text-black font-display text-sm tracking-wide shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2"
+          disabled={saving || selectedStatus === 'NONE'}
+          className={`w-full py-3.5 rounded-2xl font-extrabold text-sm font-display tracking-wider transition active:scale-95 flex items-center justify-center space-x-2 shadow-lg ${
+            selectedStatus === 'NONE'
+              ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-zinc-200'
+          }`}
         >
           <Check className="w-4 h-4" />
-          <span>{saving ? 'Сохранение...' : 'Зафиксировать статус'}</span>
+          <span>{saving ? 'Сохранение...' : 'Зафиксировать день'}</span>
         </button>
       </div>
     </div>

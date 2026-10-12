@@ -29,10 +29,14 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.gold-glow {
-  box-shadow: 0 0 25px -5px rgba(234, 179, 8, 0.35);
+.lime-glow {
+  box-shadow: 0 0 25px -3px rgba(34, 197, 94, 0.45);
 }
 
-.crimson-glow {
-  box-shadow: 0 0 25px -5px rgba(239, 68, 68, 0.35);
+.sky-glow {
+  box-shadow: 0 0 25px -3px rgba(56, 189, 248, 0.45);
+}
+
+.white-glow {
+  box-shadow: 0 0 20px -3px rgba(255, 255, 255, 0.25);
 }

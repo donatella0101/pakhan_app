@@ -3,10 +3,12 @@ import { DailyRecord, PlayerStatus, User } from './types';
 import { initTelegram, getTelegramUser } from './telegram';
 import { Header } from './components/Header';
 import { StatsOverview } from './components/StatsOverview';
+import { WeekStrip } from './components/WeekStrip';
 import { TodayCard } from './components/TodayCard';
 import { CalendarView } from './components/CalendarView';
 import { DayModal } from './components/DayModal';
 import { InviteModal } from './components/InviteModal';
+import { OutcomeModal, OutcomeType } from './components/OutcomeModal';
 import { AlertCircle } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -21,9 +23,16 @@ export const App: React.FC = () => {
   const [records, setRecords] = useState<Record<string, DailyRecord>>({});
   const [stats, setStats] = useState<any | null>(null);
 
+  const [weekOffset, setWeekOffset] = useState<number>(0);
   const [calendarDate, setCalendarDate] = useState<Date>(new Date());
   const [selectedDayModalDate, setSelectedDayModalDate] = useState<string | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [outcomeModal, setOutcomeModal] = useState<{ isOpen: boolean; outcome: OutcomeType } | null>(null);
+
+  // Profile slot for demo / web mode
+  const [profileSlot, setProfileSlot] = useState<'user1' | 'user2'>(() => {
+    return (localStorage.getItem('pakhan_slot') as 'user1' | 'user2') || 'user1';
+  });
 
   // Today's YYYY-MM-DD
   const todayStr = useMemo(() => {
@@ -31,8 +40,19 @@ export const App: React.FC = () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }, []);
 
+  // Current week Monday
+  const currentWeekStart = useMemo(() => {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(d);
+    monday.setDate(diff + weekOffset * 7);
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  }, [weekOffset]);
+
   // Fetch or initialize duel
-  const initializeApp = async () => {
+  const initializeApp = async (slot = profileSlot) => {
     try {
       setLoading(true);
       setError(null);
@@ -48,7 +68,8 @@ export const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           telegramUser: tgUser,
-          duelCode: duelCodeFromUrl
+          duelCode: duelCodeFromUrl,
+          asUser: slot
         })
       });
 
@@ -95,6 +116,13 @@ export const App: React.FC = () => {
   useEffect(() => {
     initializeApp();
   }, []);
+
+  const handleToggleUser = async () => {
+    const nextSlot = profileSlot === 'user1' ? 'user2' : 'user1';
+    setProfileSlot(nextSlot);
+    localStorage.setItem('pakhan_slot', nextSlot);
+    await initializeApp(nextSlot);
+  };
 
   // Handle setting status for today or specific day
   const handleUpdateStatus = async (dateStr: string, status: PlayerStatus) => {
@@ -156,27 +184,27 @@ export const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-900 flex flex-col items-center justify-center p-4">
-        <div className="w-16 h-16 rounded-3xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-3xl mb-4 animate-bounce">
-          👑
+      <div className="min-h-screen bg-dark-950 flex flex-col items-center justify-center p-4">
+        <div className="w-16 h-16 rounded-3xl bg-white/10 border border-white/20 flex items-center justify-center text-4xl mb-4 animate-pulse shadow-2xl">
+          💪
         </div>
-        <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400 font-display">
-          Загрузка арены...
+        <h2 className="text-sm font-black uppercase tracking-wider text-white font-display">
+          Пахан vs Малой
         </h2>
-        <p className="text-xs text-zinc-500 mt-1">Пахан vs Малой</p>
+        <p className="text-xs text-zinc-500 mt-1">Даня vs Миша</p>
       </div>
     );
   }
 
   if (error || !currentUser || !duel || !user1) {
     return (
-      <div className="min-h-screen bg-dark-900 flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-dark-950 flex flex-col items-center justify-center p-6 text-center">
         <AlertCircle className="w-12 h-12 text-rose-500 mb-3" />
         <h2 className="text-base font-bold text-white mb-1">Что-то пошло не так</h2>
         <p className="text-xs text-zinc-400 mb-4">{error || 'Не удалось найти дуэль'}</p>
         <button
-          onClick={initializeApp}
-          className="px-4 py-2 rounded-xl bg-amber-500 text-black text-xs font-bold font-display"
+          onClick={() => initializeApp()}
+          className="px-4 py-2 rounded-xl bg-white text-black text-xs font-bold font-display"
         >
           Попробовать снова
         </button>
@@ -190,8 +218,11 @@ export const App: React.FC = () => {
   const buddyTodayStatus: PlayerStatus = isUser1 ? todayRecord?.user2_status || 'NONE' : todayRecord?.user1_status || 'NONE';
   const buddy = isUser1 ? user2 : user1;
 
+  const myName = currentUser.first_name || (isUser1 ? 'Даня' : 'Миша');
+  const buddyName = buddy?.first_name || (isUser1 ? 'Миша' : 'Даня');
+
   return (
-    <div className="min-h-screen bg-dark-900 pb-12 flex flex-col max-w-md mx-auto shadow-2xl relative">
+    <div className="min-h-screen bg-dark-950 pb-12 flex flex-col max-w-md mx-auto shadow-2xl relative text-zinc-100">
       {/* Header with duel fighters */}
       <Header
         duel={duel}
@@ -199,9 +230,10 @@ export const App: React.FC = () => {
         user1={user1}
         user2={user2}
         onOpenInvite={() => setShowInviteModal(true)}
+        onToggleUser={!getTelegramUser() ? handleToggleUser : undefined}
       />
 
-      {/* Main Stats (Пахан недели, месяца, года) */}
+      {/* Main Stats (Пахан недели, месяца, года - Lime D vs Sky M) */}
       {stats && (
         <StatsOverview
           stats={stats}
@@ -211,6 +243,18 @@ export const App: React.FC = () => {
         />
       )}
 
+      {/* Week Strip (7 squares with days of the week) */}
+      <WeekStrip
+        currentWeekStart={currentWeekStart}
+        records={records}
+        todayStr={todayStr}
+        user1Name={user1.first_name}
+        user2Name={user2?.first_name}
+        onSelectDate={(dateStr) => setSelectedDayModalDate(dateStr)}
+        onPrevWeek={() => setWeekOffset((prev) => prev - 1)}
+        onNextWeek={() => setWeekOffset((prev) => Math.min(0, prev + 1))}
+      />
+
       {/* Today's Action Card */}
       <TodayCard
         todayStr={todayStr}
@@ -219,9 +263,10 @@ export const App: React.FC = () => {
         buddy={buddy}
         onSetStatus={(status) => handleUpdateStatus(todayStr, status)}
         onNudgeBuddy={handleNudgeBuddy}
+        onTriggerOutcome={(outcome) => setOutcomeModal({ isOpen: true, outcome })}
       />
 
-      {/* Interactive Calendar */}
+      {/* Interactive Month Calendar */}
       <CalendarView
         currentDate={calendarDate}
         onPrevMonth={handlePrevMonth}
@@ -232,6 +277,17 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         onSelectDay={(dateStr) => setSelectedDayModalDate(dateStr)}
       />
+
+      {/* Outcome Art Modal (4 scenarios) */}
+      {outcomeModal && (
+        <OutcomeModal
+          isOpen={outcomeModal.isOpen}
+          outcome={outcomeModal.outcome}
+          myName={myName}
+          buddyName={buddyName}
+          onClose={() => setOutcomeModal(null)}
+        />
+      )}
 
       {/* Day Edit Modal */}
       {selectedDayModalDate && (

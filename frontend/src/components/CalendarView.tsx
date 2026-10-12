@@ -63,7 +63,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
   return (
     <div className="px-4 py-2">
-      <div className="glass-panel rounded-2xl p-4 border-white/5">
+      <div className="glass-panel rounded-2xl p-4 border-white/10 bg-dark-900/80 shadow-xl">
         {/* Month Header Switcher */}
         <div className="flex items-center justify-between mb-4">
           <button
@@ -71,12 +71,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               hapticSelection();
               onPrevMonth();
             }}
-            className="p-1.5 rounded-lg bg-zinc-800 text-zinc-300 hover:text-white active:scale-95 transition"
+            className="p-1.5 rounded-xl bg-zinc-900 border border-white/5 text-zinc-300 hover:text-white active:scale-95 transition"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          <h3 className="text-sm font-extrabold text-white font-display tracking-wide uppercase">
+          <h3 className="text-xs font-black text-white font-display tracking-wider uppercase">
             {monthNames[month]} {year}
           </h3>
 
@@ -85,7 +85,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               hapticSelection();
               onNextMonth();
             }}
-            className="p-1.5 rounded-lg bg-zinc-800 text-zinc-300 hover:text-white active:scale-95 transition"
+            className="p-1.5 rounded-xl bg-zinc-900 border border-white/5 text-zinc-300 hover:text-white active:scale-95 transition"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -93,12 +93,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
         {/* Days of Week Header */}
         <div className="grid grid-cols-7 gap-1 text-center mb-2">
-          {weekDayNames.map((d, index) => (
+          {weekDayNames.map((d) => (
             <div
               key={d}
-              className={`text-[11px] font-bold ${
-                index >= 5 ? 'text-amber-500/70' : 'text-zinc-500'
-              }`}
+              className="text-[10px] font-bold text-zinc-500 uppercase"
             >
               {d}
             </div>
@@ -109,7 +107,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         <div className="grid grid-cols-7 gap-1.5">
           {daysArray.map((item, index) => {
             if (!item) {
-              return <div key={`empty-${index}`} className="h-14 rounded-xl opacity-0" />;
+              return <div key={`empty-${index}`} className="h-13 rounded-xl opacity-0" />;
             }
 
             const { dayNum, dateStr, isToday, record } = item;
@@ -117,20 +115,22 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             const u2 = record?.user2_status || 'NONE';
 
             // Background & border stylings depending on day outcome
-            let cellBg = 'bg-zinc-800/40 border-white/5';
+            let cellBg = 'bg-zinc-950/80 border-white/5';
 
             if (u1 !== 'NONE' || u2 !== 'NONE') {
               if (u1 === 'PAKHAN' && u2 === 'PAKHAN') {
-                cellBg = 'bg-amber-500/20 border-amber-500/40';
+                cellBg = 'bg-white/10 border-white/30 text-white';
               } else if (u1 === 'MALOY' && u2 === 'MALOY') {
-                cellBg = 'bg-rose-500/20 border-rose-500/40';
-              } else if (u1 === 'PAKHAN' || u2 === 'PAKHAN') {
-                cellBg = 'bg-amber-500/10 border-amber-500/25';
+                cellBg = 'bg-zinc-900 border-rose-500/30 text-rose-300';
+              } else if (u1 === 'PAKHAN') {
+                cellBg = 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300';
+              } else if (u2 === 'PAKHAN') {
+                cellBg = 'bg-sky-950/40 border-sky-500/40 text-sky-300';
               }
             }
 
             if (isToday) {
-              cellBg += ' ring-2 ring-amber-400';
+              cellBg += ' ring-2 ring-white ring-offset-1 ring-offset-black';
             }
 
             return (
@@ -140,50 +140,45 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   hapticImpact('light');
                   onSelectDay(dateStr);
                 }}
-                className={`h-14 rounded-xl border flex flex-col items-center justify-between p-1 transition-all active:scale-95 ${cellBg}`}
+                className={`h-13 rounded-xl border flex flex-col items-center justify-between p-1 transition-all active:scale-95 ${cellBg}`}
               >
                 {/* Day Number */}
-                <span className={`text-[11px] font-bold leading-none ${isToday ? 'text-amber-400 font-extrabold' : 'text-zinc-300'}`}>
+                <span className={`text-[10px] font-bold leading-none ${isToday ? 'text-white font-extrabold' : 'text-zinc-400'}`}>
                   {dayNum}
                 </span>
 
                 {/* Status Badges */}
                 <div className="flex items-center space-x-0.5 justify-center">
-                  {u1 === 'PAKHAN' && <span className="text-[10px]" title={`${user1.first_name}: Пахан`}>👑</span>}
-                  {u1 === 'MALOY' && <span className="text-[10px]" title={`${user1.first_name}: Малой`}>🍼</span>}
-                  {u1 === 'NONE' && (u2 !== 'NONE') && <span className="text-[8px] text-zinc-600">⏳</span>}
+                  {u1 === 'PAKHAN' && <span className="text-[10px] font-bold text-emerald-400" title={`${user1.first_name}: Пахан`}>Д</span>}
+                  {u1 === 'MALOY' && <span className="text-[9px]" title={`${user1.first_name}: Малой`}>🍼</span>}
 
-                  {u2 === 'PAKHAN' && <span className="text-[10px]" title="Кореш: Пахан">👑</span>}
-                  {u2 === 'MALOY' && <span className="text-[10px]" title="Кореш: Малой">🍼</span>}
-                  {u2 === 'NONE' && (u1 !== 'NONE') && <span className="text-[8px] text-zinc-600">⏳</span>}
+                  {u2 === 'PAKHAN' && <span className="text-[10px] font-bold text-sky-400" title="Кореш: Пахан">М</span>}
+                  {u2 === 'MALOY' && <span className="text-[9px]" title="Кореш: Малой">🍼</span>}
 
                   {u1 === 'NONE' && u2 === 'NONE' && (
-                    <div className="w-1 h-1 rounded-full bg-zinc-700 my-1" />
+                    <div className="w-1 h-1 rounded-full bg-zinc-800 my-0.5" />
                   )}
                 </div>
 
-                {/* Indicator dot */}
-                <div className="h-1">
-                  {isToday && <div className="w-1.5 h-1 rounded-full bg-amber-400 mx-auto" />}
-                </div>
+                <div className="h-0.5" />
               </button>
             );
           })}
         </div>
 
         {/* Legend */}
-        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-around text-[10px] text-zinc-400">
+        <div className="mt-3.5 pt-2.5 border-t border-white/5 flex items-center justify-around text-[10px] text-zinc-400">
           <div className="flex items-center space-x-1">
-            <span>👑 👑</span>
-            <span>Два Пахана</span>
+            <span className="text-emerald-400 font-bold">Д</span>
+            <span>Пахан Данил</span>
           </div>
           <div className="flex items-center space-x-1">
-            <span>👑 🍼</span>
-            <span>Пахан vs Малой</span>
+            <span className="text-sky-400 font-bold">М</span>
+            <span>Пахан Кореш</span>
           </div>
           <div className="flex items-center space-x-1">
-            <span>🍼 🍼</span>
-            <span>Два Малых</span>
+            <span>💪</span>
+            <span>Оба Паханы</span>
           </div>
         </div>
       </div>
