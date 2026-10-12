@@ -28,6 +28,7 @@ export const App: React.FC = () => {
   const [calendarDate, setCalendarDate] = useState<Date>(new Date());
   const [selectedDayModalDate, setSelectedDayModalDate] = useState<string | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [outcomeModal, setOutcomeModal] = useState<{ isOpen: boolean; outcome: OutcomeType } | null>(null);
 
   // Profile slot for demo / web mode
@@ -256,14 +257,6 @@ export const App: React.FC = () => {
         onNextWeek={() => setWeekOffset((prev) => Math.min(0, prev + 1))}
       />
 
-      {/* Last Week Champion Banner */}
-      <LastWeekChampion
-        lastWeekStats={stats?.lastWeek}
-        currentWeekStats={stats?.week}
-        user1={user1}
-        user2={user2}
-      />
-
       {/* Today's Action Card */}
       <TodayCard
         todayStr={todayStr}
@@ -275,17 +268,53 @@ export const App: React.FC = () => {
         onTriggerOutcome={(outcome) => setOutcomeModal({ isOpen: true, outcome })}
       />
 
-      {/* Interactive Month Calendar */}
-      <CalendarView
-        currentDate={calendarDate}
-        onPrevMonth={handlePrevMonth}
-        onNextMonth={handleNextMonth}
-        records={records}
+      {/* Button to open Monthly Calendar */}
+      <div className="px-4 py-2">
+        <button
+          onClick={() => setShowCalendarModal(true)}
+          className="w-full py-3.5 px-4 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 active:scale-98 transition flex items-center justify-between text-xs font-bold text-white shadow-xl group"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-white text-base">
+              📅
+            </div>
+            <div className="text-left">
+              <span className="font-extrabold text-xs block font-display">Посмотреть календарь месяца</span>
+              <span className="text-[10px] text-zinc-400 font-normal">Кто какие дни забрал</span>
+            </div>
+          </div>
+          <span className="text-xs text-zinc-400 group-hover:text-white transition font-bold flex items-center space-x-1">
+            <span>Открыть</span>
+            <span>➔</span>
+          </span>
+        </button>
+      </div>
+
+      {/* Last Week Champion Banner (внизу под календарем) */}
+      <LastWeekChampion
+        lastWeekStats={stats?.lastWeek}
+        currentWeekStats={stats?.week}
         user1={user1}
         user2={user2}
-        currentUser={currentUser}
-        onSelectDay={(dateStr) => setSelectedDayModalDate(dateStr)}
       />
+
+      {/* Interactive Month Calendar Modal */}
+      {showCalendarModal && (
+        <CalendarView
+          isModal={true}
+          currentDate={calendarDate}
+          onPrevMonth={handlePrevMonth}
+          onNextMonth={handleNextMonth}
+          records={records}
+          user1={user1}
+          user2={user2}
+          currentUser={currentUser}
+          onSelectDay={(dateStr) => {
+            setSelectedDayModalDate(dateStr);
+          }}
+          onClose={() => setShowCalendarModal(false)}
+        />
+      )}
 
       {/* Outcome Art Modal (4 scenarios) */}
       {outcomeModal && (
