@@ -47,32 +47,14 @@ export function setupBot() {
 
     let replyText = `👋 Здарова, ${fromUser.first_name}!\n\n` +
       `Добро пожаловать в **«Пахан vs Малой»** — трекер дисциплины и дуэль между двумя корешами.\n\n` +
-      `👑 **Правила простые:**\n` +
+      `💪 **Правила простые:**\n` +
       `• Каждый день отмечаешь свой статус: Пахан (сделал всё чётко) или Малой (обленился).\n` +
       `• Кореш делает то же самое.\n` +
       `• В конце недели, месяца и года смотрим, кто настоящий Пахан района, а кто застрял в Малых!`;
 
-    let duelCode = '';
-
-    if (payload && payload.startsWith('duel_')) {
-      duelCode = payload;
-      // Connect to duel as user 2 if empty
-      const duelStmt = db.prepare('SELECT * FROM duels WHERE code = ?');
-      const duel = duelStmt.get(duelCode) as any;
-
-      if (duel) {
-        if (duel.user1_id !== user.id && (!duel.user2_id || duel.user2_id === user.id)) {
-          db.prepare('UPDATE duels SET user2_id = ? WHERE code = ?').run(user.id, duelCode);
-          replyText += `\n\n⚔️ **Ты успешно залетел в дуэль!** Кореш уже ждёт.`;
-        }
-      }
-    }
-
-    const appUrlWithDuel = duelCode ? `${webAppUrl}?duel=${duelCode}` : webAppUrl;
-
     const keyboard = new InlineKeyboard().webApp(
       '🔥 Открыть битву Паханов',
-      appUrlWithDuel
+      `${webAppUrl}?duel=pakhan_main`
     );
 
     await ctx.reply(replyText, {
@@ -89,10 +71,10 @@ export function setupBot() {
 
       for (const u of users) {
         try {
-          const keyboard = new InlineKeyboard().webApp('👑 Отметить статус дня', webAppUrl);
+          const keyboard = new InlineKeyboard().webApp('💪 Отметить статус дня', `${webAppUrl}?duel=pakhan_main`);
           await bot.api.sendMessage(
             u.telegram_id,
-            `🌙 **Вечерний подсчёт!**\n\nДень подходит к концу. Ты сегодня **Пахан** 👑 или сдал назад и стал **Малым** 🍼?\n\nЗайди в приложение и зафиксируй свой статус!`,
+            `🌙 **Вечерний подсчёт!**\n\nДень подходит к концу. Ты сегодня **Пахан** 💪 или сдал назад и стал **Малым** 🍼?\n\nЗайди в приложение и зафиксируй свой статус!`,
             {
               parse_mode: 'Markdown',
               reply_markup: keyboard
@@ -124,7 +106,7 @@ export async function sendNudgeMessage(targetTelegramId: string, fromName: strin
     const keyboard = new InlineKeyboard().webApp('🔥 Отметить статус прямо сейчас', `${webAppUrl}?duel=${duelCode}`);
     await bot.api.sendMessage(
       targetTelegramId,
-      `🚨 **ЭЙ, СЛЫШЬ!**\n\nТвой кореш **${fromName}** уже зафиксировал свой статус на сегодня, а ты до сих пор тянешь резину!\n\nЗайди в апп и докажи, что ты Пахан 👑, а не Малой 🍼!`,
+      `🚨 **ЭЙ, СЛЫШЬ!**\n\nТвой кореш **${fromName}** уже зафиксировал свой статус на сегодня, а ты до сих пор тянешь резину!\n\nЗайди в апп и докажи, что ты Пахан 💪, а не Малой 🍼!`,
       {
         parse_mode: 'Markdown',
         reply_markup: keyboard

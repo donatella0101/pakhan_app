@@ -45,94 +45,108 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Ensure canonical duel exists for Danya (@znkssmt) and Misha (@hansahools)
+export function ensureCanonicalDuel() {
+  // Ensure Danya exists
+  let danya = db.prepare("SELECT * FROM users WHERE username = 'znkssmt' OR telegram_id = '756260518'").get() as any;
+  if (!danya) {
+    danya = db.prepare(`
+      INSERT INTO users (telegram_id, username, first_name)
+      VALUES ('756260518', 'znkssmt', 'Даня')
+      RETURNING *
+    `).get() as any;
+  } else if (danya.first_name !== 'Даня') {
+    db.prepare("UPDATE users SET first_name = 'Даня' WHERE id = ?").run(danya.id);
+    danya.first_name = 'Даня';
+  }
+
+  // Ensure Misha exists
+  let misha = db.prepare("SELECT * FROM users WHERE username = 'hansahools' OR telegram_id = '739647994'").get() as any;
+  if (!misha) {
+    misha = db.prepare(`
+      INSERT INTO users (telegram_id, username, first_name)
+      VALUES ('739647994', 'hansahools', 'Миша')
+      RETURNING *
+    `).get() as any;
+  } else if (misha.first_name !== 'Миша') {
+    db.prepare("UPDATE users SET first_name = 'Миша' WHERE id = ?").run(misha.id);
+    misha.first_name = 'Миша';
+  }
+
+  // Ensure canonical duel pakhan_main exists
+  let duel = db.prepare("SELECT * FROM duels WHERE code = 'pakhan_main'").get() as any;
+  if (!duel) {
+    const first = db.prepare("SELECT * FROM duels ORDER BY id ASC LIMIT 1").get() as any;
+    if (first) {
+      db.prepare("UPDATE duels SET code = 'pakhan_main', user1_id = ?, user2_id = ? WHERE id = ?").run(danya.id, misha.id, first.id);
+      duel = db.prepare("SELECT * FROM duels WHERE id = ?").get(first.id) as any;
+    } else {
+      duel = db.prepare(`
+        INSERT INTO duels (code, title, user1_id, user2_id)
+        VALUES ('pakhan_main', 'Дуэль Паханов', ?, ?)
+        RETURNING *
+      `).get(danya.id, misha.id) as any;
+    }
+  } else {
+    db.prepare("UPDATE duels SET user1_id = ?, user2_id = ? WHERE id = ?").run(danya.id, misha.id, duel.id);
+  }
+
+  return { danya, misha, duel };
+}
+
 // 2. Init user and get or join duel
 app.post('/api/duels/init', (req, res) => {
   try {
-    const { telegramUser, duelCode, asUser } = req.body;
+    const { telegramUser, asUser } = req.body;
+    const { danya, misha, duel } = ensureCanonicalDuel();
 
-    // Use mock user if opened outside Telegram
-    const isMock = !telegramUser?.id;
+    // Check if opened inside Telegram
+    const isMock = !telegramUser?.id || String(telegramUser.id).startsWith('demo_');
     const requestedSlot = asUser || 'user1';
-    
-    // Check if user is Misha by username or requested slot
-    const isMisha = telegramUser?.username?.toLowerCase() === 'hansahools' || requestedSlot === 'user2';
-    
-    const tgId = telegramUser?.id 
-      ? String(telegramUser.id) 
-      : (isMisha ? 'demo_misha' : 'demo_danya');
-    const tgUsername = telegramUser?.username || (isMisha ? 'hansahools' : 'znkssmt');
-    const tgFirstName = telegramUser?.first_name || (isMisha ? 'Миша' : 'Даня');
-    const tgPhoto = telegramUser?.photo_url || null;
 
-    // Upsert current user
-    const upsertUser = db.prepare(`
-      INSERT INTO users (telegram_id, username, first_name, photo_url)
-      VALUES (?, ?, ?, ?)
-      ON CONFLICT(telegram_id) DO UPDATE SET
-        username = excluded.username,
-        first_name = excluded.first_name,
-        photo_url = excluded.photo_url
-      RETURNING *
-    `);
-    const currentUser = upsertUser.get(tgId, tgUsername, tgFirstName, tgPhoto) as any;
+    // Determine if caller is Misha or Danya
+    const isMisha =
+      telegramUser?.username?.toLowerCase() === 'hansahools' ||
+      String(telegramUser?.id) === '739647994' ||
+      (isMock && requestedSlot === 'user2');
 
-    let duel: any = null;
+    let currentUser: any;
 
-    if (duelCode) {
-      // Find duel by code
-      duel = db.prepare('SELECT * FROM duels WHERE code = ?').get(duelCode);
-      if (duel) {
-        // If user is not user1 and user2 is empty, assign to user2
-        if (duel.user1_id !== currentUser.id && (!duel.user2_id || duel.user2_id === currentUser.id)) {
-          db.prepare('UPDATE duels SET user2_id = ? WHERE id = ?').run(currentUser.id, duel.id);
-          duel.user2_id = currentUser.id;
-        }
-      }
-    }
+    if (telegramUser?.id && !String(telegramUser.id).startsWith('demo_')) {
+      // Real Telegram user
+      const tgId = String(telegramUser.id);
+      const tgUsername = telegramUser.username || (isMisha ? 'hansahools' : 'znkssmt');
+      const tgFirstName = isMisha ? 'Миша' : (tgUsername.toLowerCase() === 'znkssmt' ? 'Даня' : (telegramUser.first_name || 'Брат'));
+      const tgPhoto = telegramUser.photo_url || null;
 
-    // If still no duel, check if user already has an active duel
-    if (!duel) {
-      duel = db.prepare(`
-        SELECT * FROM duels 
-        WHERE user1_id = ? OR user2_id = ? 
-        ORDER BY id DESC LIMIT 1
-      `).get(currentUser.id, currentUser.id);
-    }
-
-    // If still no duel, create a new one
-    if (!duel) {
-      const code = generateDuelCode();
-      const insertDuel = db.prepare(`
-        INSERT INTO duels (code, title, user1_id)
-        VALUES (?, 'Дуэль Паханов', ?)
+      currentUser = db.prepare(`
+        INSERT INTO users (telegram_id, username, first_name, photo_url)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(telegram_id) DO UPDATE SET
+          username = excluded.username,
+          first_name = excluded.first_name,
+          photo_url = excluded.photo_url
         RETURNING *
-      `);
-      duel = insertDuel.get(code, currentUser.id);
-    }
+      `).get(tgId, tgUsername, tgFirstName, tgPhoto);
 
-    // For demo/web mode, auto-link demo_misha so both players exist immediately
-    if (isMock && !duel.user2_id) {
-      const demoMisha = db.prepare(`
-        INSERT INTO users (telegram_id, username, first_name)
-        VALUES ('demo_misha', 'hansahools', 'Миша')
-        ON CONFLICT(telegram_id) DO UPDATE SET first_name = excluded.first_name
-        RETURNING *
-      `).get() as any;
-      if (demoMisha && demoMisha.id !== duel.user1_id) {
-        db.prepare('UPDATE duels SET user2_id = ? WHERE id = ?').run(demoMisha.id, duel.id);
-        duel.user2_id = demoMisha.id;
+      // Link to duel slot
+      if (isMisha) {
+        db.prepare('UPDATE duels SET user2_id = ? WHERE id = ?').run(currentUser.id, duel.id);
+      } else {
+        db.prepare('UPDATE duels SET user1_id = ? WHERE id = ?').run(currentUser.id, duel.id);
       }
+    } else {
+      // Mock / Local preview
+      currentUser = isMisha ? misha : danya;
     }
 
-    // Fetch user1 and user2 details
-    const user1 = db.prepare('SELECT id, telegram_id, username, first_name, photo_url FROM users WHERE id = ?').get(duel.user1_id) as any;
-    const user2 = duel.user2_id
-      ? db.prepare('SELECT id, telegram_id, username, first_name, photo_url FROM users WHERE id = ?').get(duel.user2_id) as any
-      : null;
+    const updatedDuel = db.prepare('SELECT * FROM duels WHERE id = ?').get(duel.id) as any;
+    const user1 = db.prepare('SELECT id, telegram_id, username, first_name, photo_url FROM users WHERE id = ?').get(updatedDuel.user1_id) as any;
+    const user2 = db.prepare('SELECT id, telegram_id, username, first_name, photo_url FROM users WHERE id = ?').get(updatedDuel.user2_id) as any;
 
     res.json({
       currentUser,
-      duel,
+      duel: updatedDuel,
       user1,
       user2
     });
@@ -214,8 +228,8 @@ app.post('/api/duels/:code/status', (req, res) => {
       return res.status(404).json({ error: 'Пользователь не найден' });
     }
 
-    const isUser1 = duel.user1_id === user.id;
-    const isUser2 = duel.user2_id === user.id;
+    const isUser1 = duel.user1_id === user.id || user.username?.toLowerCase() === 'znkssmt' || user.telegram_id === '756260518';
+    const isUser2 = duel.user2_id === user.id || user.username?.toLowerCase() === 'hansahools' || user.telegram_id === '739647994';
 
     if (!isUser1 && !isUser2) {
       return res.status(403).json({ error: 'Вы не являетесь участником этой дуэли' });
@@ -261,26 +275,25 @@ app.post('/api/duels/:code/nudge', async (req, res) => {
     const duel = db.prepare('SELECT * FROM duels WHERE code = ?').get(code) as any;
     if (!duel) return res.status(404).json({ error: 'Дуэль не найдена' });
 
-    const user = db.prepare('SELECT id, first_name FROM users WHERE telegram_id = ?').get(String(telegramId)) as any;
+    const user = db.prepare('SELECT id, first_name, username, telegram_id FROM users WHERE telegram_id = ?').get(String(telegramId)) as any;
     if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
 
-    let targetUserId = null;
-    if (duel.user1_id === user.id) targetUserId = duel.user2_id;
-    else if (duel.user2_id === user.id) targetUserId = duel.user1_id;
+    const isUser1 = duel.user1_id === user.id || user.username?.toLowerCase() === 'znkssmt' || user.telegram_id === '756260518';
+    const targetUserId = isUser1 ? duel.user2_id : duel.user1_id;
 
     if (!targetUserId) {
       return res.status(400).json({ error: 'Второй кореш еще не подключился к дуэли' });
     }
 
-    const targetUser = db.prepare('SELECT telegram_id, first_name FROM users WHERE id = ?').get(targetUserId) as any;
+    const targetUser = db.prepare('SELECT telegram_id, first_name, username FROM users WHERE id = ?').get(targetUserId) as any;
     if (!targetUser) return res.status(404).json({ error: 'Кореш не найден' });
 
-    const sent = await sendNudgeMessage(targetUser.telegram_id, user.first_name, duel.code);
+    const senderDisplayName = isUser1 ? 'Даня' : 'Миша';
+    const sent = await sendNudgeMessage(targetUser.telegram_id, senderDisplayName, duel.code);
 
     res.json({
-      success: true,
-      sent,
-      message: sent ? `Пнули ${targetUser.first_name} в Telegram!` : 'Пинок сохранен (демо-режим)'
+      success: sent,
+      message: sent ? 'Пинок успешно отправлен в Telegram!' : 'Не удалось отправить сообщение (возможно, бот заблокирован)'
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

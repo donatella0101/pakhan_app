@@ -74,6 +74,10 @@ export const TodayCard: React.FC<TodayCardProps> = ({
     weekday: 'short'
   });
 
+  const buddyDisplayName = buddy
+    ? (buddy.username === 'hansahools' ? 'Миша' : (buddy.username === 'znkssmt' ? 'Даня' : (buddy.first_name || 'Кореш')))
+    : 'Кореш';
+
   return (
     <div className="px-4 py-2">
       <div className="glass-panel rounded-2xl p-4 border-white/10 relative overflow-hidden bg-dark-900/90 shadow-xl">
@@ -106,7 +110,7 @@ export const TodayCard: React.FC<TodayCardProps> = ({
                 {myStatus === 'PAKHAN' && buddyStatus === 'PAKHAN' && '💪💪 Два Пахана'}
                 {myStatus === 'MALOY' && buddyStatus === 'MALOY' && '🍼🍼 Два Малых'}
                 {myStatus === 'PAKHAN' && buddyStatus === 'MALOY' && '💪 Ты забрал день!'}
-                {myStatus === 'MALOY' && buddyStatus === 'PAKHAN' && `🍼 ${buddy?.first_name || 'Кореш'} забрал день`}
+                {myStatus === 'MALOY' && buddyStatus === 'PAKHAN' && `🍼 ${buddyDisplayName} забрал день`}
               </span>
             </button>
           )}
@@ -161,7 +165,7 @@ export const TodayCard: React.FC<TodayCardProps> = ({
         <div className="pt-3 border-t border-white/10 flex items-center justify-between bg-zinc-950/60 -mx-4 -mb-4 px-4 py-3">
           <div className="flex items-center space-x-2">
             <span className="text-xs text-zinc-400">
-              {buddy ? buddy.first_name : 'Кореш'}:
+              {buddyDisplayName}:
             </span>
             {buddyStatus === 'PAKHAN' && (
               <span className="inline-flex items-center space-x-1 text-xs font-bold text-sky-400">

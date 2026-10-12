@@ -53,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-xs font-bold text-zinc-300 active:scale-95 transition"
             >
               <ArrowLeftRight className="w-3 h-3 text-zinc-400" />
-              <span>{isUser1Me ? 'Я: Данил (Д)' : 'Я: Кореш (М)'}</span>
+              <span>{isUser1Me ? 'Я: Даня (Д)' : 'Я: Миша (М)'}</span>
             </button>
           )}
 
@@ -73,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Versus Cards */}
       <div className="grid grid-cols-11 gap-2 items-center">
-        {/* Fighter 1 (Данил / Д - Салатовый) */}
+        {/* Fighter 1 (Даня / Д - Салатовый) */}
         <div className={`col-span-5 glass-panel rounded-2xl p-2.5 flex flex-col items-center text-center relative overflow-hidden transition ${
           isUser1Me ? 'border-emerald-500/50 bg-emerald-950/20 shadow-[0_0_15px_rgba(34,197,94,0.15)]' : 'border-white/10'
         }`}>
@@ -92,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
           <span className="font-extrabold text-xs text-white truncate max-w-[110px] font-display">
-            {user1.first_name || 'Данил'}
+            {user1.first_name || 'Даня'}
           </span>
           <span className="text-[10px] text-emerald-400 font-bold truncate max-w-[110px]">
             Салатовый (Д)
@@ -106,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Fighter 2 (Кореш / М - Небесно-голубой) */}
+        {/* Fighter 2 (Миша / М - Небесно-голубой) */}
         <div className={`col-span-5 glass-panel rounded-2xl p-2.5 flex flex-col items-center text-center relative overflow-hidden transition ${
           isUser2Me ? 'border-sky-500/50 bg-sky-950/20 shadow-[0_0_15px_rgba(56,189,248,0.15)]' : 'border-white/10'
         }`}>
@@ -127,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({
                 )}
               </div>
               <span className="font-extrabold text-xs text-white truncate max-w-[110px] font-display">
-                {user2.first_name || 'Кореш'}
+                {user2.first_name || 'Миша'}
               </span>
               <span className="text-[10px] text-sky-400 font-bold truncate max-w-[110px]">
                 Голубой (М)

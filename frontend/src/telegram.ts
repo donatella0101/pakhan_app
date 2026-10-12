@@ -34,17 +34,7 @@ export function getTelegramUser() {
     };
   }
 
-  // Fallback demo user for testing in regular browsers
-  const savedDemoId = localStorage.getItem('demo_tg_id') || `demo_${Math.floor(Math.random() * 8999 + 1000)}`;
-  localStorage.setItem('demo_tg_id', savedDemoId);
-
-  return {
-    id: savedDemoId,
-    username: 'brat_demo',
-    first_name: 'Ты (Пахан)',
-    last_name: '',
-    photo_url: undefined
-  };
+  return null;
 }
 
 // Haptic feedback helpers
