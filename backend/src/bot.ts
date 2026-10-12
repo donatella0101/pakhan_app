@@ -63,7 +63,7 @@ export function setupBot() {
     });
   });
 
-  // Test notify command for manual verification
+  // Test notify command for manual verification (evening)
   bot.command('test_notify', async (ctx) => {
     const keyboard = new InlineKeyboard().webApp('💪 Отметить статус', `${webAppUrl}?duel=pakhan_main`);
     await ctx.reply('кабанчиком отчитались и спать', {
@@ -71,7 +71,52 @@ export function setupBot() {
     });
   });
 
-  // Daily reminder cron at 23:00 (every day) in Europe/Moscow timezone
+  // Test morning command for manual verification
+  bot.command('test_morning', async (ctx) => {
+    const keyboard = new InlineKeyboard().webApp('🔥 Открыть битву', `${webAppUrl}?duel=pakhan_main`);
+    await ctx.reply('вставай шанцунг ты должен вспахать поле в сто тысяч гектаров', {
+      reply_markup: keyboard
+    });
+  });
+
+  // 1. Morning notification at 08:00 (every day) in Europe/Moscow timezone
+  cron.schedule(
+    '0 8 * * *',
+    async () => {
+      try {
+        console.log('🌅 Запуск утреннего напоминания в 08:00 (МСК)...');
+        const targetIds = new Set<string>(['756260518', '739647994']);
+        const dbUsers = db.prepare(`SELECT telegram_id FROM users WHERE telegram_id NOT LIKE 'demo_%'`).all() as any[];
+        for (const u of dbUsers) {
+          if (u.telegram_id) targetIds.add(String(u.telegram_id));
+        }
+
+        const keyboard = new InlineKeyboard().webApp('🔥 Открыть битву', `${webAppUrl}?duel=pakhan_main`);
+
+        for (const tgId of targetIds) {
+          try {
+            await bot.api.sendMessage(
+              tgId,
+              'вставай шанцунг ты должен вспахать поле в сто тысяч гектаров',
+              {
+                reply_markup: keyboard
+              }
+            );
+            console.log(`✅ Утреннее напоминание в 08:00 отправлено ${tgId}`);
+          } catch (e: any) {
+            console.warn(`⚠️ Не удалось отправить утреннее напоминание ${tgId}:`, e?.message);
+          }
+        }
+      } catch (err) {
+        console.error('Ошибка отправки утренних напоминаний в 08:00:', err);
+      }
+    },
+    {
+      timezone: 'Europe/Moscow'
+    }
+  );
+
+  // 2. Evening reminder cron at 23:00 (every day) in Europe/Moscow timezone
   cron.schedule(
     '0 23 * * *',
     async () => {
