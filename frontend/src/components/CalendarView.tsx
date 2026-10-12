@@ -21,7 +21,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onPrevMonth,
   onNextMonth,
   records,
-  user1,
+  user1: _user1,
   onSelectDay,
   onClose,
   isModal = false
@@ -162,11 +162,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
               {/* Status Badges */}
               <div className="flex items-center space-x-0.5 justify-center">
-                {u1 === 'PAKHAN' && <span className="text-[10px] font-bold text-emerald-400" title={`${user1.first_name}: Пахан`}>Д</span>}
-                {u1 === 'MALOY' && <span className="text-[9px]" title={`${user1.first_name}: Малой`}>🍼</span>}
+                {u1 === 'PAKHAN' && <span className="text-[10px] font-bold text-emerald-400" title="Даня: Пахан">Д</span>}
+                {u1 === 'MALOY' && <span className="text-[9px]" title="Даня: Малой">🍼</span>}
 
-                {u2 === 'PAKHAN' && <span className="text-[10px] font-bold text-sky-400" title="Кореш: Пахан">М</span>}
-                {u2 === 'MALOY' && <span className="text-[9px]" title="Кореш: Малой">🍼</span>}
+                {u2 === 'PAKHAN' && <span className="text-[10px] font-bold text-sky-400" title="Миша: Пахан">М</span>}
+                {u2 === 'MALOY' && <span className="text-[9px]" title="Миша: Малой">🍼</span>}
 
                 {u1 === 'NONE' && u2 === 'NONE' && (
                   <div className="w-1 h-1 rounded-full bg-zinc-800 my-0.5" />

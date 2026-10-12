@@ -52,7 +52,7 @@ export const TodayCard: React.FC<TodayCardProps> = ({
           onTriggerOutcome('BOTH_MALOY');
         } else if (status === 'PAKHAN') {
           onTriggerOutcome('I_WON');
-        } else if (status === 'MALOY' && buddyStatus === 'PAKHAN') {
+        } else if (status === 'MALOY') {
           onTriggerOutcome('BUDDY_WON');
         }
       }

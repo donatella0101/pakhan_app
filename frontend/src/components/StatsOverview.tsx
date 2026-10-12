@@ -22,8 +22,8 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
   const [activeTab, setActiveTab] = useState<'week' | 'month' | 'year'>('week');
   const currentPeriod = stats[activeTab];
 
-  const u1Name = user1.first_name || 'Данил';
-  const u2Name = user2 ? user2.first_name : 'Кореш';
+  const u1Name = user1.username === 'znkssmt' ? 'Даня' : (user1.first_name || 'Даня');
+  const u2Name = user2 ? (user2.username === 'hansahools' ? 'Миша' : (user2.first_name || 'Миша')) : 'Миша';
 
   // Determine leader badge
   let leaderText = 'Ещё нет отметок';

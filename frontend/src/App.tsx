@@ -323,6 +323,7 @@ export const App: React.FC = () => {
           outcome={outcomeModal.outcome}
           myName={myName}
           buddyName={buddyName}
+          isViewerDanya={isUser1}
           onClose={() => setOutcomeModal(null)}
         />
       )}

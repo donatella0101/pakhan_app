@@ -67,7 +67,7 @@ export const OutcomeModal: React.FC<OutcomeModalProps> = ({
       badge: 'ДЕНЬ ЛЕНИ',
       badgeColor: 'bg-rose-500/20 text-rose-400 border-rose-500/40',
       title: 'ОБА ДАЛИ СЛАБИНУ 🍼🍼',
-      subtitle: 'Отлично проебали день, ковбои с Горбатой горы! Завтра узнаем, исправитесь ли вы',
+      subtitle: 'Отлично проебали день гомики с горбатой горы, завтра узнаем остались ли вы пидорами',
       borderColor: 'border-rose-500/40',
       buttonText: 'Завтра реванш 💤'
     }
@@ -77,7 +77,7 @@ export const OutcomeModal: React.FC<OutcomeModalProps> = ({
   const imgSrc = getIllustrationSrc();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
       <div className={`relative w-full max-w-sm rounded-3xl p-5 bg-dark-950 border ${current.borderColor} shadow-2xl text-center overflow-hidden`}>
         {/* Close Button */}
         <button

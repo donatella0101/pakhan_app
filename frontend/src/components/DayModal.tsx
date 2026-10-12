@@ -31,7 +31,8 @@ export const DayModal: React.FC<DayModalProps> = ({
   const [selectedStatus, setSelectedStatus] = useState<PlayerStatus>(currentMyStatus);
   const [saving, setSaving] = useState(false);
 
-  const parsedDate = new Date(dateStr);
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const parsedDate = new Date(y, m - 1, d);
   const formattedDate = parsedDate.toLocaleDateString('ru-RU', {
     day: 'numeric',
     month: 'long',
@@ -39,7 +40,9 @@ export const DayModal: React.FC<DayModalProps> = ({
     year: 'numeric'
   });
 
-  const buddyName = isUser1 ? (user2 ? user2.first_name : 'Кореш') : user1.first_name;
+  const buddyName = isUser1
+    ? (user2?.username === 'hansahools' ? 'Миша' : (user2?.first_name || 'Миша'))
+    : (user1?.username === 'znkssmt' ? 'Даня' : (user1?.first_name || 'Даня'));
 
   const handleSave = async () => {
     try {
@@ -61,7 +64,7 @@ export const DayModal: React.FC<DayModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="w-full max-w-md bg-dark-950 border border-white/10 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl relative">
         {/* Close Button */}
         <button
