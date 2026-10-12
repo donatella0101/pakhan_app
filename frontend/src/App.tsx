@@ -4,6 +4,7 @@ import { initTelegram, getTelegramUser } from './telegram';
 import { Header } from './components/Header';
 import { StatsOverview } from './components/StatsOverview';
 import { WeekStrip } from './components/WeekStrip';
+import { LastWeekChampion } from './components/LastWeekChampion';
 import { TodayCard } from './components/TodayCard';
 import { CalendarView } from './components/CalendarView';
 import { DayModal } from './components/DayModal';
@@ -253,6 +254,14 @@ export const App: React.FC = () => {
         onSelectDate={(dateStr) => setSelectedDayModalDate(dateStr)}
         onPrevWeek={() => setWeekOffset((prev) => prev - 1)}
         onNextWeek={() => setWeekOffset((prev) => Math.min(0, prev + 1))}
+      />
+
+      {/* Last Week Champion Banner */}
+      <LastWeekChampion
+        lastWeekStats={stats?.lastWeek}
+        currentWeekStats={stats?.week}
+        user1={user1}
+        user2={user2}
       />
 
       {/* Today's Action Card */}

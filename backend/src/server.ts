@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import { db, initDb } from './db.js';
 import { setupBot, sendNudgeMessage } from './bot.js';
-import { calculateStatsForPeriod, getMonthDates, getWeekDates, getYearDates, DailyRecord } from './stats.js';
+import { calculateStatsForPeriod, getMonthDates, getWeekDates, getPreviousWeekDates, getYearDates, DailyRecord } from './stats.js';
 
 dotenv.config();
 
@@ -164,13 +164,15 @@ app.get('/api/duels/:code', (req, res) => {
     const currentMonth = now.getMonth() + 1;
 
     const weekDates = getWeekDates(now);
+    const prevWeekDates = getPreviousWeekDates(now);
     const monthDates = getMonthDates(currentYear, currentMonth);
     const yearDates = getYearDates(currentYear);
 
-    const u1Name = (user1 as any)?.first_name || 'Участник 1';
-    const u2Name = (user2 as any)?.first_name || 'Участник 2';
+    const u1Name = (user1 as any)?.first_name || 'Даня';
+    const u2Name = (user2 as any)?.first_name || 'Миша';
 
     const weekStats = calculateStatsForPeriod(records, weekDates.start, weekDates.end, 'week', u1Name, u2Name);
+    const lastWeekStats = calculateStatsForPeriod(records, prevWeekDates.start, prevWeekDates.end, 'week', u1Name, u2Name);
     const monthStats = calculateStatsForPeriod(records, monthDates.start, monthDates.end, 'month', u1Name, u2Name);
     const yearStats = calculateStatsForPeriod(records, yearDates.start, yearDates.end, 'year', u1Name, u2Name);
 
@@ -181,6 +183,7 @@ app.get('/api/duels/:code', (req, res) => {
       records,
       stats: {
         week: weekStats,
+        lastWeek: lastWeekStats,
         month: monthStats,
         year: yearStats
       }

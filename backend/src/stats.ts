@@ -38,6 +38,23 @@ export function getWeekDates(referenceDate = new Date()): { start: string; end: 
   };
 }
 
+// Get dates for previous week (Monday through Sunday)
+export function getPreviousWeekDates(referenceDate = new Date()): { start: string; end: string } {
+  const d = new Date(referenceDate);
+  const day = d.getDay();
+  const distanceToMonday = day === 0 ? -6 : 1 - day;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + distanceToMonday - 7);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  return {
+    start: formatDate(monday),
+    end: formatDate(sunday)
+  };
+}
+
 // Get dates for current month
 export function getMonthDates(year: number, month: number): { start: string; end: string } {
   const start = new Date(year, month - 1, 1);
