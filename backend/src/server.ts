@@ -329,5 +329,5 @@ app.use((req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Сервер «Пахан vs Малой» запущен на http://localhost:${PORT}`);
+  console.log(`🚀 Сервер «Из пасанов в паханов» запущен на http://localhost:${PORT}`);
 });

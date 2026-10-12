@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           <div>
             <h1 className="text-sm font-black tracking-wider uppercase text-white font-display">
-              Пахан vs Малой
+              Из пасанов в паханов
             </h1>
             <p className="text-[10px] text-zinc-400 tracking-wide font-medium">
               Дуэль дисциплины #{duel.code}

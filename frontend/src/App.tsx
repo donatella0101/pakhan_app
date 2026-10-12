@@ -191,7 +191,7 @@ export const App: React.FC = () => {
           💪
         </div>
         <h2 className="text-sm font-black uppercase tracking-wider text-white font-display">
-          Пахан vs Малой
+          Из пасанов в паханов
         </h2>
         <p className="text-xs text-zinc-500 mt-1">Даня vs Миша</p>
       </div>

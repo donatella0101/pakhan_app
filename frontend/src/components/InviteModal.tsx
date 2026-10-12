@@ -15,7 +15,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({ duel, onClose }) => {
   const botUsername = 'pakhan_duel_bot';
   const inviteUrl = `https://t.me/${botUsername}?start=${duel.code}`;
 
-  const shareText = `Здарова! Залетай на дуэль дисциплины: «Пахан vs Малой». Проверим, кто из нас настоящий Пахан, а кто Малой! 💪🍼`;
+  const shareText = `Здарова! Залетай на дуэль дисциплины: «Из пасанов в паханов». Проверим, кто из нас настоящий Пахан, а кто Малой! 💪🍼`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(inviteUrl);
