@@ -1,0 +1,26 @@
+{
+  "name": "pakhan-vs-maloy",
+  "version": "1.0.0",
+  "description": "Telegram Mini App трекер дисциплины и дуэль двух друзей: Пахан vs Малой",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build": "cd frontend && npm run build && cd ../backend && npm run build",
+    "build:cloud": "cd frontend && npm install && npm run build && cd ../backend && npm install && npm run build",
+    "postinstall": "cd frontend && npm install && cd ../backend && npm install",
+    "start": "cd backend && node dist/server.js"
+  },
+  "keywords": [
+    "telegram-mini-app",
+    "tma",
+    "react",
+    "discipline",
+    "tracker"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}
