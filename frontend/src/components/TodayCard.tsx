@@ -46,15 +46,15 @@ export const TodayCard: React.FC<TodayCardProps> = ({
 
       await onSetStatus(status);
 
-      // Determine outcome to show visual modal
-      if (onTriggerOutcome) {
+      // Determine outcome to show visual modal ONLY if both marked
+      if (onTriggerOutcome && buddyStatus !== 'NONE') {
         if (status === 'PAKHAN' && buddyStatus === 'PAKHAN') {
           onTriggerOutcome('BOTH_PAKHAN');
         } else if (status === 'MALOY' && buddyStatus === 'MALOY') {
           onTriggerOutcome('BOTH_MALOY');
-        } else if (status === 'PAKHAN') {
+        } else if (status === 'PAKHAN' && buddyStatus === 'MALOY') {
           onTriggerOutcome('I_WON');
-        } else if (status === 'MALOY') {
+        } else if (status === 'MALOY' && buddyStatus === 'PAKHAN') {
           onTriggerOutcome('BUDDY_WON');
         }
       }
@@ -80,37 +80,41 @@ export const TodayCard: React.FC<TodayCardProps> = ({
     ? (buddy.username === 'hansahools' ? 'Миша' : (buddy.username === 'znkssmt' ? 'Даня' : (buddy.first_name || 'Кореш')))
     : 'Кореш';
 
-  // Determine current day visual card & phrase for this user's profile
+  // Determine current day visual card & phrase ONLY when BOTH have chosen who they are!
   let currentImgSrc = '';
   let currentBadge = '';
   let currentPhrase = '';
   let currentBorder = 'border-white/10';
   let currentOutcome: OutcomeType | null = null;
 
-  if (myStatus === 'PAKHAN' && buddyStatus === 'PAKHAN') {
-    currentImgSrc = '/assets/both_pakhan.jpg';
-    currentBadge = 'ОБА ПАХАНЫ 💪💪';
-    currentPhrase = 'СПАРТАНЦЫ НЕ ОТСТУПАЮТ, НЕ КАПИТУЛИРУЮТ';
-    currentBorder = 'border-white/40';
-    currentOutcome = 'BOTH_PAKHAN';
-  } else if (myStatus === 'MALOY' && buddyStatus === 'MALOY') {
-    currentImgSrc = '/assets/both_maloy.jpg';
-    currentBadge = 'ОБА МАЛЫЕ 🍼🍼';
-    currentPhrase = 'Отлично проебали день гомики с горбатой горы, завтра узнаем остались ли вы пидорами';
-    currentBorder = 'border-rose-500/40';
-    currentOutcome = 'BOTH_MALOY';
-  } else if (myStatus === 'PAKHAN') {
-    currentImgSrc = isViewerDanya ? '/assets/danya_pakhan.jpg' : '/assets/misha_pakhan.jpg';
-    currentBadge = isViewerDanya ? 'ДАНЯ — ПАХАН 💪' : 'МИША — ПАХАН 💪';
-    currentPhrase = 'приветствую пахан сегодня это твой день от начала и до конца, еби и завтрешний день';
-    currentBorder = isViewerDanya ? 'border-emerald-500/50' : 'border-sky-500/50';
-    currentOutcome = 'I_WON';
-  } else if (myStatus === 'MALOY') {
-    currentImgSrc = isViewerDanya ? '/assets/danya_maloy.jpg' : '/assets/misha_maloy.jpg';
-    currentBadge = isViewerDanya ? 'ДАНЯ — МАЛОЙ 🍼' : 'МИША — МАЛОЙ 🍼';
-    currentPhrase = 'общий малой сегодня ты конкертная вафельница попробуй сделать хоть что нибудь завтра';
-    currentBorder = 'border-rose-500/40';
-    currentOutcome = 'BUDDY_WON';
+  const bothSelected = myStatus !== 'NONE' && buddyStatus !== 'NONE';
+
+  if (bothSelected) {
+    if (myStatus === 'PAKHAN' && buddyStatus === 'PAKHAN') {
+      currentImgSrc = '/assets/both_pakhan.jpg';
+      currentBadge = 'ОБА ПАХАНЫ 💪💪';
+      currentPhrase = 'СПАРТАНЦЫ НЕ ОТСТУПАЮТ, НЕ КАПИТУЛИРУЮТ';
+      currentBorder = 'border-white/40';
+      currentOutcome = 'BOTH_PAKHAN';
+    } else if (myStatus === 'MALOY' && buddyStatus === 'MALOY') {
+      currentImgSrc = '/assets/both_maloy.jpg';
+      currentBadge = 'ОБА МАЛЫЕ 🍼🍼';
+      currentPhrase = 'Отлично проебали день гомики с горбатой горы, завтра узнаем остались ли вы пидорами';
+      currentBorder = 'border-rose-500/40';
+      currentOutcome = 'BOTH_MALOY';
+    } else if (myStatus === 'PAKHAN' && buddyStatus === 'MALOY') {
+      currentImgSrc = isViewerDanya ? '/assets/danya_pakhan.jpg' : '/assets/misha_pakhan.jpg';
+      currentBadge = isViewerDanya ? 'ДАНЯ — ПАХАН 💪' : 'МИША — ПАХАН 💪';
+      currentPhrase = 'приветствую пахан сегодня это твой день от начала и до конца, еби и завтрешний день';
+      currentBorder = isViewerDanya ? 'border-emerald-500/50' : 'border-sky-500/50';
+      currentOutcome = 'I_WON';
+    } else if (myStatus === 'MALOY' && buddyStatus === 'PAKHAN') {
+      currentImgSrc = isViewerDanya ? '/assets/danya_maloy.jpg' : '/assets/misha_maloy.jpg';
+      currentBadge = isViewerDanya ? 'ДАНЯ — МАЛОЙ 🍼' : 'МИША — МАЛОЙ 🍼';
+      currentPhrase = 'общий малой сегодня ты конкертная вафельница попробуй сделать хоть что нибудь завтра';
+      currentBorder = 'border-rose-500/40';
+      currentOutcome = 'BUDDY_WON';
+    }
   }
 
   return (
@@ -193,7 +197,7 @@ export const TodayCard: React.FC<TodayCardProps> = ({
           </div>
         </div>
 
-        {/* Inline Personal Profile Photo & Quote Card */}
+        {/* Inline Personal Profile Photo & Quote Card (Only when BOTH selected) */}
         {currentImgSrc && (
           <div
             onClick={() => {
@@ -221,6 +225,19 @@ export const TodayCard: React.FC<TodayCardProps> = ({
                 </p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Waiting indicator when only one person has marked */}
+        {myStatus !== 'NONE' && buddyStatus === 'NONE' && (
+          <div className="mb-4 p-3.5 rounded-2xl bg-zinc-950/80 border border-white/10 text-center">
+            <div className="flex items-center justify-center space-x-2 text-zinc-300 text-xs font-bold mb-1">
+              <span className="text-sm">⏳</span>
+              <span>Твой выбор зафиксирован!</span>
+            </div>
+            <p className="text-[11px] text-zinc-500">
+              Ждём, пока {buddyDisplayName} сделает свой выбор. Карточка откроется, когда оба выберут, кто они!
+            </p>
           </div>
         )}
 
