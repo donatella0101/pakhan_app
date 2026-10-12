@@ -63,31 +63,50 @@ export function setupBot() {
     });
   });
 
-  // Daily reminder cron at 21:00 (every day)
-  cron.schedule('0 21 * * *', async () => {
-    try {
-      console.log('⏰ Запуск ежедневного вечернего напоминания...');
-      const users = db.prepare('SELECT telegram_id, first_name FROM users').all() as any[];
-
-      for (const u of users) {
-        try {
-          const keyboard = new InlineKeyboard().webApp('💪 Отметить статус дня', `${webAppUrl}?duel=pakhan_main`);
-          await bot.api.sendMessage(
-            u.telegram_id,
-            `🌙 **Вечерний подсчёт!**\n\nДень подходит к концу. Ты сегодня **Пахан** 💪 или сдал назад и стал **Малым** 🍼?\n\nЗайди в приложение и зафиксируй свой статус!`,
-            {
-              parse_mode: 'Markdown',
-              reply_markup: keyboard
-            }
-          );
-        } catch (e) {
-          // ignore blocked users
-        }
-      }
-    } catch (err) {
-      console.error('Ошибка отправки напоминаний:', err);
-    }
+  // Test notify command for manual verification
+  bot.command('test_notify', async (ctx) => {
+    const keyboard = new InlineKeyboard().webApp('💪 Отметить статус', `${webAppUrl}?duel=pakhan_main`);
+    await ctx.reply('кабанчиком отчитались и спать', {
+      reply_markup: keyboard
+    });
   });
+
+  // Daily reminder cron at 23:00 (every day) in Europe/Moscow timezone
+  cron.schedule(
+    '0 23 * * *',
+    async () => {
+      try {
+        console.log('⏰ Запуск ежедневного напоминания в 23:00 (МСК)...');
+        const targetIds = new Set<string>(['756260518', '739647994']);
+        const dbUsers = db.prepare(`SELECT telegram_id FROM users WHERE telegram_id NOT LIKE 'demo_%'`).all() as any[];
+        for (const u of dbUsers) {
+          if (u.telegram_id) targetIds.add(String(u.telegram_id));
+        }
+
+        const keyboard = new InlineKeyboard().webApp('💪 Отметить статус', `${webAppUrl}?duel=pakhan_main`);
+
+        for (const tgId of targetIds) {
+          try {
+            await bot.api.sendMessage(
+              tgId,
+              'кабанчиком отчитались и спать',
+              {
+                reply_markup: keyboard
+              }
+            );
+            console.log(`✅ Напоминание в 23:00 отправлено ${tgId}`);
+          } catch (e: any) {
+            console.warn(`⚠️ Не удалось отправить напоминание ${tgId}:`, e?.message);
+          }
+        }
+      } catch (err) {
+        console.error('Ошибка отправки напоминаний в 23:00:', err);
+      }
+    },
+    {
+      timezone: 'Europe/Moscow'
+    }
+  );
 
   // Launch bot long polling
   bot.start({
