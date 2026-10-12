@@ -119,6 +119,15 @@ export const App: React.FC = () => {
     initializeApp();
   }, []);
 
+  // Poll every 5 seconds for live updates when buddy marks their status
+  useEffect(() => {
+    if (!duel?.code) return;
+    const interval = setInterval(() => {
+      fetchDuelData(duel.code);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [duel?.code]);
+
   const handleToggleUser = async () => {
     const nextSlot = profileSlot === 'user1' ? 'user2' : 'user1';
     setProfileSlot(nextSlot);
@@ -143,12 +152,30 @@ export const App: React.FC = () => {
 
       if (!res.ok) throw new Error('Ошибка обновления статуса');
       const data = await res.json();
+      const updatedRecord: DailyRecord = data.record;
 
       // Update record in state
       setRecords((prev) => ({
         ...prev,
-        [dateStr]: data.record
+        [dateStr]: updatedRecord
       }));
+
+      // Trigger outcome modal ONLY if both players have selected their status for this day
+      if (updatedRecord.user1_status !== 'NONE' && updatedRecord.user2_status !== 'NONE') {
+        const isU1 = currentUser.telegram_id === user1?.telegram_id;
+        const myStat = isU1 ? updatedRecord.user1_status : updatedRecord.user2_status;
+        const buddyStat = isU1 ? updatedRecord.user2_status : updatedRecord.user1_status;
+
+        if (myStat === 'PAKHAN' && buddyStat === 'PAKHAN') {
+          setOutcomeModal({ isOpen: true, outcome: 'BOTH_PAKHAN' });
+        } else if (myStat === 'MALOY' && buddyStat === 'MALOY') {
+          setOutcomeModal({ isOpen: true, outcome: 'BOTH_MALOY' });
+        } else if (myStat === 'PAKHAN' && buddyStat === 'MALOY') {
+          setOutcomeModal({ isOpen: true, outcome: 'I_WON' });
+        } else if (myStat === 'MALOY' && buddyStat === 'PAKHAN') {
+          setOutcomeModal({ isOpen: true, outcome: 'BUDDY_WON' });
+        }
+      }
 
       // Refetch stats
       await fetchDuelData(duel.code);

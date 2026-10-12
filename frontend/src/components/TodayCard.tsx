@@ -45,19 +45,6 @@ export const TodayCard: React.FC<TodayCardProps> = ({
       }
 
       await onSetStatus(status);
-
-      // Determine outcome to show visual modal ONLY if both marked
-      if (onTriggerOutcome && buddyStatus !== 'NONE') {
-        if (status === 'PAKHAN' && buddyStatus === 'PAKHAN') {
-          onTriggerOutcome('BOTH_PAKHAN');
-        } else if (status === 'MALOY' && buddyStatus === 'MALOY') {
-          onTriggerOutcome('BOTH_MALOY');
-        } else if (status === 'PAKHAN' && buddyStatus === 'MALOY') {
-          onTriggerOutcome('I_WON');
-        } else if (status === 'MALOY' && buddyStatus === 'PAKHAN') {
-          onTriggerOutcome('BUDDY_WON');
-        }
-      }
     } finally {
       setLoading(false);
     }
@@ -237,6 +224,18 @@ export const TodayCard: React.FC<TodayCardProps> = ({
             </div>
             <p className="text-[11px] text-zinc-500">
               Ждём, пока {buddyDisplayName} сделает свой выбор. Карточка откроется, когда оба выберут, кто они!
+            </p>
+          </div>
+        )}
+
+        {myStatus === 'NONE' && buddyStatus !== 'NONE' && (
+          <div className="mb-4 p-3.5 rounded-2xl bg-zinc-950/80 border border-white/15 text-center">
+            <div className="flex items-center justify-center space-x-2 text-white text-xs font-bold mb-1">
+              <span className="text-sm">⚡</span>
+              <span>{buddyDisplayName} уже сделал выбор!</span>
+            </div>
+            <p className="text-[11px] text-zinc-400">
+              Выбери свой статус выше, чтобы открыть картинку итога дня!
             </p>
           </div>
         )}

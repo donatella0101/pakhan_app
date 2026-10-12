@@ -127,10 +127,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           const u1 = record?.user1_status || 'NONE';
           const u2 = record?.user2_status || 'NONE';
 
+          const bothVoted = u1 !== 'NONE' && u2 !== 'NONE';
+
           // Background & border stylings depending on day outcome
           let cellBg = 'bg-zinc-900/80 border-white/5';
 
-          if (u1 !== 'NONE' || u2 !== 'NONE') {
+          if (bothVoted) {
             if (u1 === 'PAKHAN' && u2 === 'PAKHAN') {
               cellBg = 'bg-white/10 border-white/30 text-white';
             } else if (u1 === 'MALOY' && u2 === 'MALOY') {
@@ -140,6 +142,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             } else if (u2 === 'PAKHAN') {
               cellBg = 'bg-sky-950/40 border-sky-500/40 text-sky-300';
             }
+          } else if (u1 !== 'NONE' || u2 !== 'NONE') {
+            cellBg = 'bg-zinc-800/60 border-white/15';
           }
 
           if (isToday) {
@@ -162,13 +166,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
               {/* Status Badges */}
               <div className="flex items-center space-x-0.5 justify-center">
-                {u1 === 'PAKHAN' && <span className="text-[10px] font-bold text-emerald-400" title="Даня: Пахан">Д</span>}
-                {u1 === 'MALOY' && <span className="text-[9px]" title="Даня: Малой">🍼</span>}
+                {bothVoted ? (
+                  <>
+                    {u1 === 'PAKHAN' && <span className="text-[10px] font-bold text-emerald-400" title="Даня: Пахан">Д</span>}
+                    {u1 === 'MALOY' && <span className="text-[9px]" title="Даня: Малой">🍼</span>}
 
-                {u2 === 'PAKHAN' && <span className="text-[10px] font-bold text-sky-400" title="Миша: Пахан">М</span>}
-                {u2 === 'MALOY' && <span className="text-[9px]" title="Миша: Малой">🍼</span>}
-
-                {u1 === 'NONE' && u2 === 'NONE' && (
+                    {u2 === 'PAKHAN' && <span className="text-[10px] font-bold text-sky-400" title="Миша: Пахан">М</span>}
+                    {u2 === 'MALOY' && <span className="text-[9px]" title="Миша: Малой">🍼</span>}
+                  </>
+                ) : (u1 !== 'NONE' || u2 !== 'NONE') ? (
+                  <span className="text-[9px] text-zinc-400" title="Ждём второго игрока">⏳</span>
+                ) : (
                   <div className="w-1 h-1 rounded-full bg-zinc-800 my-0.5" />
                 )}
               </div>

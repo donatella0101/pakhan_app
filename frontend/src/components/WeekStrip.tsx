@@ -103,12 +103,15 @@ export const WeekStrip: React.FC<WeekStripProps> = ({
             const u1 = record?.user1_status || 'NONE';
             const u2 = record?.user2_status || 'NONE';
 
+            const bothVoted = u1 !== 'NONE' && u2 !== 'NONE';
+            const hasPakhanGlow = bothVoted && (u1 === 'PAKHAN' || u2 === 'PAKHAN');
+
             let cellBg = 'bg-zinc-900/80 border-white/10 text-zinc-400';
             let mainContent: React.ReactNode = null;
             let subLabel = dayNum;
 
-            // 1. Danil won (user1 is PAKHAN, user2 is not)
-            if (u1 === 'PAKHAN' && u2 !== 'PAKHAN') {
+            // 1. Danil won (user1 is PAKHAN, user2 is MALOY)
+            if (bothVoted && u1 === 'PAKHAN' && u2 === 'MALOY') {
               cellBg = 'bg-emerald-500 text-black border-emerald-400 lime-glow font-black';
               mainContent = (
                 <span className="text-base font-black leading-none tracking-tight font-display">
@@ -116,8 +119,8 @@ export const WeekStrip: React.FC<WeekStripProps> = ({
                 </span>
               );
             }
-            // 2. Friend won (user2 is PAKHAN, user1 is not)
-            else if (u2 === 'PAKHAN' && u1 !== 'PAKHAN') {
+            // 2. Friend won (user2 is PAKHAN, user1 is MALOY)
+            else if (bothVoted && u2 === 'PAKHAN' && u1 === 'MALOY') {
               cellBg = 'bg-sky-400 text-black border-sky-300 sky-glow font-black';
               mainContent = (
                 <span className="text-base font-black leading-none tracking-tight font-display">
@@ -126,7 +129,7 @@ export const WeekStrip: React.FC<WeekStripProps> = ({
               );
             }
             // 3. BOTH are PAKHAN
-            else if (u1 === 'PAKHAN' && u2 === 'PAKHAN') {
+            else if (bothVoted && u1 === 'PAKHAN' && u2 === 'PAKHAN') {
               cellBg = 'bg-gradient-to-br from-emerald-500 via-teal-400 to-sky-400 text-black border-white/30 font-black shadow-lg';
               mainContent = (
                 <span className="text-xs font-black leading-none flex items-center justify-center">
@@ -135,7 +138,7 @@ export const WeekStrip: React.FC<WeekStripProps> = ({
               );
             }
             // 4. BOTH are MALOY
-            else if (u1 === 'MALOY' && u2 === 'MALOY') {
+            else if (bothVoted && u1 === 'MALOY' && u2 === 'MALOY') {
               cellBg = 'bg-zinc-800/90 text-rose-300 border-rose-500/30';
               mainContent = (
                 <span className="text-xs leading-none">🍼</span>
@@ -170,7 +173,7 @@ export const WeekStrip: React.FC<WeekStripProps> = ({
               >
                 {/* Day label (Пн, Вт...) */}
                 <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                  (u1 === 'PAKHAN' || u2 === 'PAKHAN') ? 'text-black/70' : 'text-zinc-400'
+                  hasPakhanGlow ? 'text-black/70' : 'text-zinc-400'
                 }`}>
                   {dayLabel}
                 </span>
@@ -182,7 +185,7 @@ export const WeekStrip: React.FC<WeekStripProps> = ({
 
                 {/* Date number */}
                 <span className={`text-[9px] font-semibold ${
-                  (u1 === 'PAKHAN' || u2 === 'PAKHAN') ? 'text-black/60' : 'text-zinc-500'
+                  hasPakhanGlow ? 'text-black/60' : 'text-zinc-500'
                 }`}>
                   {subLabel}
                 </span>

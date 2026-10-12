@@ -63,9 +63,34 @@ export const DayModal: React.FC<DayModalProps> = ({
     }
   };
 
+  const bothSelected = currentMyStatus !== 'NONE' && currentBuddyStatus !== 'NONE';
+  let dayImgSrc = '';
+  let dayBadge = '';
+  let dayPhrase = '';
+
+  if (bothSelected) {
+    if (currentMyStatus === 'PAKHAN' && currentBuddyStatus === 'PAKHAN') {
+      dayImgSrc = '/assets/both_pakhan.jpg';
+      dayBadge = 'ОБА ПАХАНЫ 💪💪';
+      dayPhrase = 'СПАРТАНЦЫ НЕ ОТСТУПАЮТ, НЕ КАПИТУЛИРУЮТ';
+    } else if (currentMyStatus === 'MALOY' && currentBuddyStatus === 'MALOY') {
+      dayImgSrc = '/assets/both_maloy.jpg';
+      dayBadge = 'ОБА МАЛЫЕ 🍼🍼';
+      dayPhrase = 'Отлично проебали день гомики с горбатой горы, завтра узнаем остались ли вы пидорами';
+    } else if (currentMyStatus === 'PAKHAN' && currentBuddyStatus === 'MALOY') {
+      dayImgSrc = isUser1 ? '/assets/danya_pakhan.jpg' : '/assets/misha_pakhan.jpg';
+      dayBadge = isUser1 ? 'ДАНЯ — ПАХАН 💪' : 'МИША — ПАХАН 💪';
+      dayPhrase = 'приветствую пахан сегодня это твой день от начала и до конца, еби и завтрешний день';
+    } else if (currentMyStatus === 'MALOY' && currentBuddyStatus === 'PAKHAN') {
+      dayImgSrc = isUser1 ? '/assets/danya_maloy.jpg' : '/assets/misha_maloy.jpg';
+      dayBadge = isUser1 ? 'ДАНЯ — МАЛОЙ 🍼' : 'МИША — МАЛОЙ 🍼';
+      dayPhrase = 'общий малой сегодня ты конкертная вафельница попробуй сделать хоть что нибудь завтра';
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-md bg-dark-950 border border-white/10 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl relative">
+      <div className="w-full max-w-md bg-dark-950 border border-white/10 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -83,6 +108,23 @@ export const DayModal: React.FC<DayModalProps> = ({
             {formattedDate}
           </h3>
         </div>
+
+        {/* Outcome photo card if BOTH filled */}
+        {bothSelected && dayImgSrc && (
+          <div className="mb-4 rounded-2xl overflow-hidden border border-white/15 bg-zinc-950 shadow-xl">
+            <div className="relative w-full aspect-[4/3] bg-zinc-900">
+              <img src={dayImgSrc} alt={dayBadge} className="w-full h-full object-cover object-center" />
+              <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 text-[10px] font-black uppercase tracking-wider text-white">
+                {dayBadge}
+              </div>
+            </div>
+            <div className="p-3 bg-zinc-950 text-center border-t border-white/10">
+              <p className="text-xs text-zinc-100 font-semibold italic leading-relaxed">
+                «{dayPhrase}»
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Outcome banner if buddy filled */}
         <div className="mb-4 p-3 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-between">

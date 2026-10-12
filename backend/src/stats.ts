@@ -110,10 +110,6 @@ export function calculateStatsForPeriod(
 
         if (u1 === 'PAKHAN' && u2 === 'PAKHAN') bothPakhan++;
         if (u1 === 'MALOY' && u2 === 'MALOY') bothMaloy++;
-      } else if (u1 === 'PAKHAN') {
-        u1Pakhan++;
-      } else if (u2 === 'PAKHAN') {
-        u2Pakhan++;
       }
     }
   }
