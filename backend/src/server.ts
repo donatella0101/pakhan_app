@@ -29,22 +29,6 @@ app.use((_req, res, next) => {
   next();
 });
 
-// Initialize SQLite database
-initDb();
-
-// Start Telegram Bot
-setupBot();
-
-// Helper to generate a friendly duel code
-function generateDuelCode(): string {
-  return 'duel_' + crypto.randomBytes(4).toString('hex');
-}
-
-// 1. Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
 // Ensure canonical duel exists for Danya (@znkssmt) and Misha (@hansahools)
 export function ensureCanonicalDuel() {
   // Ensure Danya exists
@@ -91,8 +75,42 @@ export function ensureCanonicalDuel() {
     db.prepare("UPDATE duels SET user1_id = ?, user2_id = ? WHERE id = ?").run(danya.id, misha.id, duel.id);
   }
 
+  // Ensure initial sample history if table is empty
+  const recCount = db.prepare('SELECT COUNT(*) as count FROM daily_records WHERE duel_id = ?').get(duel.id) as any;
+  if (!recCount || recCount.count === 0) {
+    const today = new Date();
+    for (let i = 4; i >= 1; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const u1 = i % 2 === 0 ? 'PAKHAN' : 'MALOY';
+      const u2 = i === 1 ? 'MALOY' : 'PAKHAN';
+      db.prepare(`
+        INSERT OR IGNORE INTO daily_records (duel_id, date, user1_status, user2_status)
+        VALUES (?, ?, ?, ?)
+      `).run(duel.id, dateStr, u1, u2);
+    }
+  }
+
   return { danya, misha, duel };
 }
+
+// Initialize SQLite database & ensure canonical duel on boot
+initDb();
+ensureCanonicalDuel();
+
+// Start Telegram Bot
+setupBot();
+
+// Helper to generate a friendly duel code
+function generateDuelCode(): string {
+  return 'duel_' + crypto.randomBytes(4).toString('hex');
+}
+
+// 1. Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // 2. Init user and get or join duel
 app.post('/api/duels/init', (req, res) => {
